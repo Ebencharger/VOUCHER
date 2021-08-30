@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./bootstrap.css">
+    <link rel="stylesheet" href="./voucher.css">
+    <title>CARD VOUCHER</title>
+
+</head>
+
+<body>
+    <div id="nahead">
+        <div id="see" onclick="cardsall()">See Pins Details</div>
+    </div>
+    <div class="d-flex m-4">
+        <div class="card-body generator" id="gen">
+            <select name="" id="sel" onchange="cardname(this)">
+                <option value="">SELECT CARD</option>
+                <option value="MTN">MTN</option>
+                <option value="AIRTEL">AIRTEL</option>
+                <option value="GLO">GLO</option>
+            </select>
+            <select name="" id="amount" onchange="cardname(this)">
+                <option value="">AMOUNT</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+            <input type="text" placeholder="CLICK THE BUTTON BELOW TO GENERATE PIN" class="form-group, form-control-lg"
+                id="pindisplay">
+            <button class="btn-primary w-50" id="genpin" onclick="generate()">GENERATE PIN</button>
+            <button class="btn-success w-50" id="savedet" onclick="savepin()">SAVE PIN DEATILS</button>
+            <div class="card card-body bg" style="font-size: 40px; color: white;" id="gensuccess">
+            </div>
+        </div>
+        <div class="card-body load">
+            <input type="text" placeholder="ENTER YOUR CARD" class="form-group, form-control-lg" id="enterc">
+            <button class="btn-primary w-50" id="recharge" onclick="rechargecard()">RECHARGE CARD</button>
+            <div class="card card-body bh" style="font-size: 40px; color: white;" id="loadsuccess">
+            </div>
+        </div>
+    </div>
+    <table id="cards">
+        <th>S/N</th>
+        <th>NETWORK PROVIDER</th>
+        <th>DATE PRINTED</th>
+        <th>AMOUNT</th>
+        <th>PIN</th>
+        <th>PINREF</th>
+        <th>STATUS</th>
+    </table>
+
+</body>
+
+</html>
+<script>
+    let card = [];
+    let getit;
+    let comparecard, j, t, q, z, h, g, now;
+    let number = "1234567890", savecar;
+    let cardnam, cardvalue, cardpin, cardused, usedcard, comcard;
+    let pindis, pin, index = 0;
+    let sel = document.querySelector('#sel');
+    let nahead = document.getElementById('nahead');
+    let amount = document.querySelector('#amount');
+    let pindisplay = document.querySelector('#pindisplay');
+    let genpin = document.getElementById('genpin');
+    let savedet = document.getElementById('savedet');
+    let enterc = document.querySelector('#enterc');
+    let recharge = document.getElementById('recharge');
+    let loadsuccess = document.getElementById('loadsuccess');
+    let gensuccess = document.getElementById('gensuccess');
+    gensuccess.style.display = "none";
+    loadsuccess.style.display = "none";
+    nahead.style.backgroundColor = "black";
+    nahead.style.color = "white", condition=false;
+    let a, b, c, d, daypr;
+    a = "", b = "", c = "", d = "";
+    if (localStorage.getItem("generate")) {
+        let v = localStorage.getItem('generate');
+        let loadcard = JSON.parse(v);
+        card = loadcard;
+    }
+    function pingen() {
+        for (let i = 0; i < 4; i++) {
+            a += number.charAt(Math.floor(Math.random() * number.length));
+            b += number.charAt(Math.floor(Math.random() * number.length));
+            c += number.charAt(Math.floor(Math.random() * number.length));
+            d += number.charAt(Math.floor(Math.random() * number.length));
+        }
+        pindisplay.value = "";
+        pindis = `${a}-${b}-${c}-${d}`;
+        pin = a + b + c + d;
+        pindisplay.value = pindis;
+    }
+    function generate() {
+        a = "", b = "", c = "", d = "";
+        pingen();
+        if (cardnam == "MTN") {
+            cardpin = "*555*" + pin + "#";
+            console.log(cardpin);
+        }
+        else if (cardnam == "AIRTEL") {
+            cardpin = "*121*" + pin + "#";
+            console.log(cardpin);
+        }
+        else if (cardnam == "GLO") {
+            cardpin = "*123*" + pin + "#";
+            console.log(cardpin);
+        }
+    }
+    function cardname(param) {
+        if (param.id == "sel") {
+            cardnam = param.value;
+            if (cardnam == "MTN") {
+                nahead.style.backgroundColor = "yellow";
+                nahead.style.color = "black"
+            }
+            else if (cardnam == "AIRTEL") {
+                nahead.style.backgroundColor = "red";
+                nahead.style.color = "black"
+            }
+            else {
+                nahead.style.backgroundColor = "green";
+                nahead.style.color = "white"
+            }
+        }
+        else {
+            cardvalue = param.value;
+        }
+    }
+
+    let mydate = new Date;
+    let date = mydate.getDate();
+    let month = (mydate.getMonth() + 1);
+    let year = mydate.getFullYear();
+    let tim = mydate.getMinutes();
+    let oldtime = tim;
+    let oldhr = mydate.getHours();
+    function savepin() {
+        daypr = (`${date}/${month}/${year}; ${oldhr}:${oldtime}`);
+        card.push({ cardnam, daypr, cardvalue, pin, cardpin, cardused: "unused" });
+        localStorage.setItem('generate', JSON.stringify(card));
+        j = setInterval(() => {
+            gensuccess.style.display = "inherit"
+            gensuccess.innerHTML = `<p>You have successfully generated ${cardnam} of #${cardvalue} </p>`
+            t = setInterval(() => {
+                gensuccess.style.display = "none"
+            }, 3000);
+            clearInterval(j)
+        }, 500);
+    }
+
+
+
+    function rechargecard() {
+        condition=false;
+        card.forEach(function (max, i) {
+            // console.log(max.cardpin,enterc.value);
+            if (enterc.value == (max.cardpin) && max.cardused == "unused") {
+                j = setInterval(() => {
+                    console.log("you just loaded " + max.cardnam + " of " + max.cardvalue);
+                    loadsuccess.style.display = "inherit"
+                    loadsuccess.innerHTML = `<p>You have successfully recharged ${max.cardnam} of #${max.cardvalue} </p>`;
+                    max.cardused = "used"
+                    max = max;
+                    localStorage.setItem('generate', JSON.stringify(card));
+                    t = setInterval(() => {
+                        loadsuccess.style.display = "none";
+                    }, 4000);
+                    clearInterval(j);
+                }, 10);
+                clearInterval(t);
+                return;
+            } else if ((enterc.value != max.cardpin)&& condition!=true) {
+                condition = true
+                console.log('input',enterc.value);
+                console.log('stored',max.cardpin);
+                q = setTimeout(() => {
+                    console.log("CHECK THE PIN OR USE APPROPRIATE PROVIDER CODE");
+                    loadsuccess.style.display = "inherit"
+                    loadsuccess.innerHTML = `<p>CHECK THE PIN OR USE APPROPRIATE PROVIDER CODE</p>`
+                    z = setTimeout(() => {
+                        loadsuccess.style.display = "none"
+                    }, 4000);
+                    clearTimeout(q)
+                }, 10);
+                return;
+            }
+            else if (max.cardused == "used" && enterc.value === max.cardpin) {
+                q = setTimeout(() => {
+                    loadsuccess.style.display = "inherit"
+                    loadsuccess.innerHTML = `<p>PIN IS ALREADY USED</p>`
+                    z = setTimeout(() => {
+                        loadsuccess.style.display = "none"
+                    }, 4000);
+                    clearTimeout(q)
+                }, 10);
+                return;
+            }
+
+            
+
+        })
+    }
+
+    function cardsall() {
+        card.forEach(function (max, i) {
+            cards.innerHTML += `<td>${i + 1}</td><td>${max.cardnam}</td><td>${max.daypr}</td><td>${max.cardvalue}</td><td>${max.pin}</td><td>${max.cardpin}</td><td>${max.cardused}</td>`
+        })
+    }
+
+
+</script>
